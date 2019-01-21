@@ -1,0 +1,46 @@
+<?php
+
+// Отримуєм вміст файла CSV
+$file = file_get_contents("MOCK_DATA_TEST_TI.csv");
+
+$file_strings = explode("\n", $file);
+
+$file_elements = array();
+$n = 0;
+
+// Перебираєм массив і розбиваєм строки
+foreach ($file_strings as $file_string) {
+    $file_elements[$n] = explode(',', $file_string);
+    $n++;
+}
+
+// Перебираєм массив і видаляєм непотрібні символи
+$n = 0;
+foreach ($file_elements as $file_element) {
+    if (strlen($file_element[6]) > 5) {
+        $clean1 = str_replace(" ", "", $file_element[6]);
+        $clean2 = str_replace("+", "", $clean1);
+        $clean3 = str_replace("(", "", $clean2);
+        $clean4 = str_replace(")", "", $clean3);
+        $final_clean = str_replace("-", "", $clean4);
+        $file_elements[$n][6] = $final_clean;
+    }
+// Змінюєм формат дати
+    if (strlen($file_element[8]) == 10) {
+      $file_elements[$n][8] = date("d.m.Y", strtotime($file_element[8]));
+    }
+    $n++;
+}
+
+header("Content-type: text/csv");
+header("Content-Disposition: attachment; filename=MOCK_DATA_TEST_TI_NEW.csv");
+header("Pragma: no-cache");
+header("Expires: 0");
+
+$out = fopen('php://output', 'w');
+
+foreach($file_elements as $item)
+{
+    fputcsv($out, $item);
+}
+fclose($out);
